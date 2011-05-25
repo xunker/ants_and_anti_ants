@@ -15,8 +15,6 @@ class Window < Gosu::Window
     @ant = [Gosu::Color.new(0xffFFFF00), Gosu::Color.new(0xffFF00FF)]
     
     @steps = 0
-    @draw_fast = false
-    @superfast = false
     @start_time = Time.now
     
     calcuate_bounds
@@ -37,17 +35,7 @@ class Window < Gosu::Window
     sps = @steps / (Time.now - @start_time)
     self.caption = "#{@window_title} - #{@steps} steps - #{sps.round}/sec - cell size #{@cellsize}"
   end
-  
-  def randomize_cells
-    @cells_y.times do |y|
-      @cells[y] = []
-      @cells_x.times do |x|
-        rand(10) > 8 ? @cells[y] << 1 : @cells[y] << 0
-      end
-    end
-    place_ants
-  end
-  
+    
   def clear_cells
     @cells_x.times do |x|
       @cells[x] = []
@@ -127,37 +115,18 @@ class Window < Gosu::Window
   end
   
   def draw
-    unless @superfast
-      @cells.each_with_index do |cy, y|
-        next if cy == []
-        cy.each_with_index do |cx, x|
-          if cx == 1
-            if @draw_fast
-              point(x*@cellsize, y*@cellsize,@color)
-            else
-              draw_rectangle(y*@cellsize, x*@cellsize,(y*@cellsize)+@cellsize,(x*@cellsize)+@cellsize,@color)
-            end
-          end
+    @cells.each_with_index do |cy, y|
+      next if cy == []
+      cy.each_with_index do |cx, x|
+        if cx == 1
+          point(x*@cellsize, y*@cellsize,@color)
         end
       end
-  
-      @ants.each do |ant_x, ant_y, ant_direction, ant_type|
-        draw_rectangle(ant_y*@cellsize, ant_x*@cellsize,(ant_y*@cellsize)+@cellsize,(ant_x*@cellsize)+@cellsize,@ant[ant_type])
-      end
-    else
-      @ants.each do |ant_x, ant_y, ant_direction, ant_type|
-        point(ant_x*@cellsize, ant_y*@cellsize,@ant[ant_type])
-      end
     end
-  end
-  
-  def draw_square(center, side, color)
-    top = center[0]-(side/2).ceil
-    left = center[1]-(side/2).ceil
-    bottom = center[0]+(side/2).to_i
-    right = center[1]+(side/2).to_i
-    
-    draw_rectangle(top, left, bottom, right, color)
+
+    @ants.each do |ant_x, ant_y, ant_direction, ant_type|
+      draw_rectangle(ant_y*@cellsize, ant_x*@cellsize,(ant_y*@cellsize)+@cellsize,(ant_x*@cellsize)+@cellsize,@ant[ant_type])
+    end
   end
   
   def draw_rectangle(top, left, bottom, right, color)
@@ -188,29 +157,8 @@ class Window < Gosu::Window
     if id == Gosu::Button::KbC
       clear_cells
       place_ants
-    end
-    if id == Gosu::Button::KbR
-      randomize_cells
-    end
-    
-    if id == Gosu::Button::KbF
-      @draw_fast = case @draw_fast
-      when true
-        false
-      when false
-        true
-      end
-    end
-    if id == Gosu::Button::KbS
-      @superfast = case @superfast
-      when true
-        false
-      when false
-        true
-      end
     end    
   end
-    
 end
 
 window = Window.new
